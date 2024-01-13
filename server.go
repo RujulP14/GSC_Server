@@ -22,6 +22,7 @@ func main() {
 
    // Set up routes
    routes.SetupUserRoutes(router)
+   routes.SetupNGORoutes(router)
 
    // Run the server
    port := os.Getenv("PORT")

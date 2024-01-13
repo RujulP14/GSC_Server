@@ -3,106 +3,47 @@ package controllers
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 
 	"Server/db"
 	"Server/models"
+	"Server/utils" // Import the utils package
 
 	"github.com/gin-gonic/gin"
-	"golang.org/x/crypto/bcrypt"
 	"google.golang.org/api/iterator"
 )
 
 const usersCollection = "users"
 
 func CreateUser(c *gin.Context) {
-	var user models.User
-	if err := c.ShouldBindJSON(&user); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
+   var user models.User
+   if err := c.ShouldBindJSON(&user); err != nil {
+      c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+      return
+   }
 
-	// Hash the user's password
-	hashedPassword, err := hashPassword(user.PasswordHash)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
-		return
-	}
+   // Hash the user's password using the function from the utils package
+   hashedPassword, err := utils.HashPassword(user.PasswordHash)
+   if err != nil {
+      c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
+      return
+   }
 
-	// Set the hashed password
-	user.PasswordHash = hashedPassword
+   // Set the hashed password
+   user.PasswordHash = hashedPassword
 
-	// Omitting the ID field to let Firebase generate a unique ID
-	docRef, _, err := db.FirestoreClient.Collection(usersCollection).Add(context.Background(), user)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
-		return
-	}
+   // Omitting the ID field to let Firebase generate a unique ID
+   docRef, _, err := db.FirestoreClient.Collection(usersCollection).Add(context.Background(), user)
+   if err != nil {
+      c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
+      return
+   }
 
-	// Retrieve the generated default UID from the Firestore document reference
-	uid := docRef.ID
+   // Retrieve the generated default UID from the Firestore document reference
+   uid := docRef.ID
 
-	c.JSON(http.StatusCreated, gin.H{"message": "User created successfully", "uid": uid})
+   c.JSON(http.StatusCreated, gin.H{"message": "User created successfully", "uid": uid})
 }
-
-func LoginUser(c *gin.Context) {
-	var credentials struct {
-	   Email    string `json:"email"`
-	   Password string `json:"password"`
-	}
- 
-	if err := c.ShouldBindJSON(&credentials); err != nil {
-	   c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-	   return
-	}
- 
-	// Retrieve user by email
-	user, err := getUserByEmail(credentials.Email)
-	if err != nil {
-	   c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid email"})
-	   return
-	}
- 
-	// Compare hashed password
-	if err := comparePasswords(user.PasswordHash, credentials.Password); err != nil {
-		fmt.Println(err)
-	   c.JSON(http.StatusUnauthorized, gin.H{"error": "Incorrect password"})
-	   return
-	}
- 
-	// Authentication successful
-	c.JSON(http.StatusOK, gin.H{"message": "Login successful", "user": user})
- }
- 
- func hashPassword(password string) (string, error) {
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	if err != nil {
-	   return "", err
-	}
-	return string(hashedPassword), nil
- }
- 
- func comparePasswords(hashedPassword, password string) error {
-	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
- }
- 
- func getUserByEmail(email string) (*models.User, error) {
-	query := db.FirestoreClient.Collection(usersCollection).Where("Email", "==", email)
-	iter := query.Documents(context.Background())
- 
-	doc, err := iter.Next()
-	if err == iterator.Done {
-	   return nil, err
-	}
-	if err != nil {
-	   return nil, err
-	}
- 
-	var user models.User
-	doc.DataTo(&user)
-	return &user, nil
- }
 
 func GetUser(c *gin.Context) {
    userID := c.Param("id")
@@ -196,3 +137,49 @@ func DeleteUser(c *gin.Context) {
 
    c.JSON(http.StatusOK, gin.H{"message": "User deleted successfully"})
 }
+
+func LoginUser(c *gin.Context) {
+   var credentials struct {
+      Email    string `json:"email"`
+      Password string `json:"password"`
+   }
+
+   if err := c.ShouldBindJSON(&credentials); err != nil {
+      c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+      return
+   }
+
+   // Retrieve user by email
+   user, err := getUserByEmail(credentials.Email)
+   if err != nil {
+      c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid email"})
+      return
+   }
+
+   // Compare hashed password using the function from the utils package
+   if err := utils.ComparePasswords(user.PasswordHash, credentials.Password); err != nil {
+      c.JSON(http.StatusUnauthorized, gin.H{"error": "Incorrect password"})
+      return
+   }
+
+   // Authentication successful
+   c.JSON(http.StatusOK, gin.H{"message": "Login successful", "user": user})
+}
+
+ 
+ func getUserByEmail(email string) (*models.User, error) {
+	query := db.FirestoreClient.Collection(usersCollection).Where("Email", "==", email)
+	iter := query.Documents(context.Background())
+ 
+	doc, err := iter.Next()
+	if err == iterator.Done {
+	   return nil, err
+	}
+	if err != nil {
+	   return nil, err
+	}
+ 
+	var user models.User
+	doc.DataTo(&user)
+	return &user, nil
+ }
