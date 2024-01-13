@@ -15,6 +15,7 @@ type NGOProfile struct {
 }
 
 type NGO struct {
+   UID          string `json:"uid"`
    Email        string `json:"email"`
    PasswordHash string `json:"password"`
    Profile      NGOProfile `json:"profile"`

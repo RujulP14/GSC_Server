@@ -9,6 +9,7 @@ import (
 	"Server/models"
 	"Server/utils"
 
+	"cloud.google.com/go/firestore"
 	"github.com/gin-gonic/gin"
 	"google.golang.org/api/iterator"
 )
@@ -40,7 +41,20 @@ func CreateNGO(c *gin.Context) {
    }
 
    // Retrieve the generated default UID from the Firestore document reference
+   // Retrieve the generated default UID from the Firestore document reference
    uid := docRef.ID
+
+   // Set the UID in the model
+   ngo.UID = uid
+
+   // Update the UID in Firestore
+	_, err = docRef.Update(context.Background(), []firestore.Update{
+		{Path: "UID", Value: uid},
+	})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update UID in Firestore"})
+		return
+	}
    
    c.JSON(http.StatusCreated, gin.H{"message": "NGO created successfully", "uid": uid})
 }

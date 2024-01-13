@@ -8,7 +8,7 @@ import (
 )
 
 func SetupNGORoutes(router *gin.Engine) {
-   ngoGroup := router.Group("/ngos")
+   ngoGroup := router.Group("/api/ngo")
    {
       ngoGroup.POST("/", controllers.CreateNGO)
       ngoGroup.GET("/:id", controllers.GetNGO)
