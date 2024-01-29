@@ -1,7 +1,6 @@
-# ml_model/generate_module.py
+# chatbot/generate_module.py
 
 import os
-import sys
 from dotenv import load_dotenv
 load_dotenv()
 import google.generativeai as genai
