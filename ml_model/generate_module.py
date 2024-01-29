@@ -1,14 +1,19 @@
 # ml_model/generate_module.py
 
 import os
+import sys
 from dotenv import load_dotenv
 load_dotenv()
-GOOGLE_API_KEY=os.getenv("GOOGLE_API_KEY")
 import google.generativeai as genai
 import pathlib
 import textwrap
 from IPython.display import Markdown
+
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+
+# Configure the GenerativeAI module with the provided Google API key
 genai.configure(api_key=GOOGLE_API_KEY)
+
 def to_markdown(text):
     """
     Converts plain text to Markdown format.
@@ -21,7 +26,7 @@ def to_markdown(text):
     """
     # Replace '•' with Markdown bullet points ('*')
     text = text.replace('•', '  *')
-    
+
     # Indent the text for proper Markdown formatting
     return Markdown(textwrap.indent(text, '', predicate=lambda _: True))
 
@@ -48,12 +53,14 @@ class Generate:
         # Step 4: Send the prompt as a message and get the response
         response = self.chat.send_message(prompt)
 
-        s = to_markdown(response.text).data
-        with open("response.txt", 'a', encoding="utf-8") as res:
-            res.write(s)
-            res.write('\n\n')
+        # If you want to store the data in some then uncomment the below code
+        
+        # s = to_markdown(response.text).data
+        # with open("response.txt", 'a', encoding="utf-8") as res:
+        #     res.write(s)
+        #     res.write('\n\n')
 
-    def generate_text(self, s):
+    def generate_text(self, inp):
         """
         Generates and processes text based on the provided input
 
@@ -64,17 +71,21 @@ class Generate:
         Returns:
         - str: The first line of the Markdown-formatted response.
         """
-        response = self.chat.send_message(s) or self.model.generate_content(s, safety_settings={'HARM_CATEGORY_SEXUALLY_EXPLICIT': 'block_none'}) or "None Found"
-        
-        with open("response.txt", 'a', encoding="utf-8") as res:
-            res.write(s)
-            res.write('\n\n')
+        response = self.chat.send_message(inp) or self.model.generate_content(inp, safety_settings={'HARM_CATEGORY_SEXUALLY_EXPLICIT': 'block_none'}) or "None Found"
 
-        s = to_markdown(response.text).data
+        # If you want to store the data in some then uncomment the below code
 
-        with open("response.txt", 'a', encoding="utf-8") as res:
-            res.write(s)
-            res.write('\n\n')
+        # with open("response.txt", 'a', encoding="utf-8") as res:
+        #     res.write(inp)
+        #     res.write('\n\n')
 
-        s = s.split('\n')[0]
-        return s
+        out = to_markdown(response.text).data
+
+        # If you want to store the data in some then uncomment the below code
+
+        # with open("response.txt", 'a', encoding="utf-8") as res:
+        #     res.write(out)
+        #     res.write('\n\n')
+
+        out = out.split('\n')[0]
+        return out
