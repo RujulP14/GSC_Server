@@ -12,22 +12,23 @@ import (
 )
 
 func main() {
-   // Initialize Firestore
-   if err := db.InitFirestore(); err != nil {
-      log.Fatalf("Error initializing Firestore: %v", err)
-   }
+	// Initialize Firestore
+	if err := db.InitFirestore(); err != nil {
+		log.Fatalf("Error initializing Firestore: %v", err)
+	}
 
-   // Set up Gin router
-   router := gin.Default()
+	// Set up Gin router
+	router := gin.Default()
 
-   // Set up routes
-   routes.SetupUserRoutes(router)
-   routes.SetupNGORoutes(router)
+	// Set up routes
+	routes.SetupUserRoutes(router)
+	routes.SetupNGORoutes(router)
+	routes.SetupChatbotRoutes(router)
 
-   // Run the server
-   port := os.Getenv("PORT")
-   if port == "" {
-      port = "8080"
-   }
-   router.Run(":" + port)
+	// Run the server
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	router.Run(":" + port)
 }

@@ -20,5 +20,3 @@ type NGO struct {
    PasswordHash string `json:"password"`
    Profile      NGOProfile `json:"profile"`
 }
-
-

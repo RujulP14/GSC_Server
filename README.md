@@ -12,6 +12,7 @@ Welcome to the NGO API documentation. This API allows you to manage NGOs, includ
 - [API Endpoints](#api-endpoints)
   - [User](#user)
   - [NGO](#ngo)
+  - [Chatbot](#chatbot)
 
 ## Introduction
 
@@ -185,5 +186,25 @@ Content-Type: application/json
 {
   "email": "ngo@example.com",
   "password": "secretpassword"
+}
+```
+
+#### Chatbot
+
+1. **Get Chatbot Response**
+
+```
+GET /api/chatbot
+Content-type: application/json
+
+{
+  "inputText": "What is menstruation cycle?"
+}
+```
+
+```
+Response format
+{
+  "outputText: "The menstrual cycle is the regular natural change that occurs in the female reproductive system that makes pregnancy possible. The cycle is regulated by the female sex hormones estrogen and progesterone."
 }
 ```

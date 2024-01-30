@@ -39,8 +39,6 @@ func CreateNGO(c *gin.Context) {
       c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create NGO"})
       return
    }
-
-   // Retrieve the generated default UID from the Firestore document reference
    // Retrieve the generated default UID from the Firestore document reference
    uid := docRef.ID
 

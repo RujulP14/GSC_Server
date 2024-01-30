@@ -42,7 +42,7 @@ class Generate:
         self.model = genai.GenerativeModel('gemini-pro')
 
         # Step 2: Read the contents of 'prompt.txt' and create a prompt string
-        with open('prompt.txt', "r", encoding="utf-8") as f:
+        with open('./chatbot/prompt.txt', "r", encoding="utf-8") as f:
             lines = f.readlines()
         prompt = ' '.join(lines)
 
@@ -70,7 +70,10 @@ class Generate:
         Returns:
         - str: The first line of the Markdown-formatted response.
         """
-        response = self.chat.send_message(inp) or self.model.generate_content(inp, safety_settings={'HARM_CATEGORY_SEXUALLY_EXPLICIT': 'block_none'}) or "None Found"
+        try:
+            response = self.chat.send_message(inp)
+        except:
+            response = self.model.generate_content(inp, safety_settings={'HARM_CATEGORY_SEXUALLY_EXPLICIT': 'block_none', 'HARM_CATEGORY_HATE_SPEECH': 'block_none','HARM_CATEGORY_HARASSMENT': 'block_none', 'HARM_CATEGORY_DANGEROUS_CONTENT': 'block_none'}) or "None Found"
 
         # If you want to store the data in some then uncomment the below code
 
