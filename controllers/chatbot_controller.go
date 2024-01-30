@@ -5,6 +5,8 @@ package controllers
 import (
 	"Server/utils"
 	"net/http"
+	"os"
+	"path/filepath"
 
 	"github.com/gin-gonic/gin"
 )
@@ -29,8 +31,43 @@ func GetChatbotResponse(c *gin.Context) {
 		return
 	}
 
+	// Get the current working directory
+	dir, err := os.Getwd()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Construct the path to the prompt.txt file
+	promptPath := filepath.Join(dir, "utils", "prompt.txt")
+
+	// Read the text from prompt.txt
+	promptBytes, err := os.ReadFile(promptPath)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	}
+
+	// Convert the content to string
+	promptText := string(promptBytes)
+
 	payload := map[string]interface{}{
 		"contents": []map[string]interface{}{
+			{
+				"role": "user",
+				"parts": []map[string]interface{}{
+					{
+						"text": promptText,
+					},
+				},
+			},
+			{
+				"role": "model",
+				"parts": []map[string]interface{}{
+					{
+						"text": "Hi",
+					},
+				},
+			},
 			{
 				"role": "user",
 				"parts": []map[string]interface{}{
