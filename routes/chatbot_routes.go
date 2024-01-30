@@ -10,6 +10,6 @@ import (
 func SetupChatbotRoutes(router *gin.Engine) {
 	chatbotGroup := router.Group("/api/chatbot")
 	{
-		chatbotGroup.GET("/", controllers.GetChatbotResponse)
+		chatbotGroup.POST("/", controllers.GetChatbotResponse)
 	}
 }

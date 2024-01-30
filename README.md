@@ -205,6 +205,6 @@ Content-type: application/json
 ```
 Response format
 {
-  "outputText: "The menstrual cycle is the regular natural change that occurs in the female reproductive system that makes pregnancy possible. The cycle is regulated by the female sex hormones estrogen and progesterone."
+  "output: "The menstrual cycle is the regular natural change that occurs in the female reproductive system that makes pregnancy possible. The cycle is regulated by the female sex hormones estrogen and progesterone."
 }
 ```

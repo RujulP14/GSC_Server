@@ -1,5 +1,0 @@
-python-dotenv
-google-generativeai
-pathlib
-textwrap
-ipython
