@@ -2,6 +2,7 @@
 package models
 
 type NGOProfile struct {
+   RegistrationNumber string `json:"registrationNumber"`
    NGOName     string `json:"ngoName"`
    WorksFor    string `json:"worksFor"`
    Address     string `json:"address"`
