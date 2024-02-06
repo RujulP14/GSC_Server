@@ -29,21 +29,51 @@ func CreateCampaign(c *gin.Context) {
 	}
 
 	// Retrieve the generated UID from the Firestore document reference
-	uid := docRef.ID
+	campaignID := docRef.ID
 
-	// Set the UID in the model
-	campaign.UID = uid
+	// Set the campaign ID in the model
+	campaign.ID = campaignID
 
 	// Update the UID in Firestore
 	_, err = docRef.Update(context.Background(), []firestore.Update{
-		{Path: "UID", Value: uid},
+		{Path: "ID", Value: campaignID},
 	})
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update UID in Firestore"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update ID in Firestore"})
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"message": "Campaign created successfully", "uid": uid})
+	// Add the campaign ID to the NGO's campaigns array
+	ngoID := campaign.NGO_ID
+	ngoRef := db.FirestoreClient.Collection(ngosCollection).Doc(ngoID)
+	err = db.FirestoreClient.RunTransaction(context.Background(), func(ctx context.Context, tx *firestore.Transaction) error {
+		// Get the current campaigns array of the NGO
+		docSnap, err := tx.Get(ngoRef)
+		if err != nil {
+			return err
+		}
+
+		var ngo models.NGO
+		if err := docSnap.DataTo(&ngo); err != nil {
+			return err
+		}
+
+		// Append the new campaign ID to the array
+		ngo.Campaigns = append(ngo.Campaigns, campaignID)
+
+		// Update the NGO document in Firestore
+		if err := tx.Set(ngoRef, ngo); err != nil {
+			return err
+		}
+
+		return nil
+	})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update NGO with campaign ID"})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{"message": "Campaign created successfully", "id": campaignID})
 }
 
 func GetCampaign(c *gin.Context) {
@@ -127,18 +157,6 @@ func UpdateCampaign(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Campaign updated successfully"})
 }
 
-func DeleteCampaign(c *gin.Context) {
-	campaignID := c.Param("id")
-
-	_, err := db.FirestoreClient.Collection(campaignsCollection).Doc(campaignID).Delete(context.Background())
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete campaign"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "Campaign deleted successfully"})
-}
-
 func UpdateCampaignImage(c *gin.Context) {
 	campaignID := c.Param("id")
 
@@ -170,60 +188,66 @@ func UpdateCampaignImage(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Campaign image updated successfully"})
 }
 
-func AddDonorToCampaign(c *gin.Context) {
+func DeleteCampaign(c *gin.Context) {
 	campaignID := c.Param("id")
 
-	var donor models.Donor
-	if err := c.ShouldBindJSON(&donor); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	// Check if the campaign exists
+	// Retrieve the campaign document
 	campaignRef := db.FirestoreClient.Collection(campaignsCollection).Doc(campaignID)
-	docSnapshot, err := campaignRef.Get(context.Background())
+	campaignDoc, err := campaignRef.Get(context.Background())
 	if err != nil {
-		if err == iterator.Done {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Campaign not found"})
-			return
-		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve campaign"})
 		return
 	}
 
-	// Add the donor to the campaign
-	docSnapshot.Ref.Update(context.Background(), []firestore.Update{
-		{Path: "Donors", Value: firestore.ArrayUnion(donor)},
-	})
-
-	c.JSON(http.StatusOK, gin.H{"message": "Donor added to the campaign successfully"})
-}
-
-func RemoveDonorFromCampaign(c *gin.Context) {
-	campaignID := c.Param("id")
-
-	var donor models.Donor
-	if err := c.ShouldBindJSON(&donor); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	// Get the NGO ID associated with the campaign
+	var campaign models.Campaign
+	if err := campaignDoc.DataTo(&campaign); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse campaign data"})
 		return
 	}
+	ngoID := campaign.NGO_ID
 
-	// Check if the campaign exists
-	campaignRef := db.FirestoreClient.Collection(campaignsCollection).Doc(campaignID)
-	docSnapshot, err := campaignRef.Get(context.Background())
+	// Delete the campaign document
+	_, err = campaignRef.Delete(context.Background())
 	if err != nil {
-		if err == iterator.Done {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Campaign not found"})
-			return
-		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve campaign"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete campaign"})
 		return
 	}
 
-	// Remove the donor from the campaign
-	docSnapshot.Ref.Update(context.Background(), []firestore.Update{
-		{Path: "Donors", Value: firestore.ArrayRemove(donor)},
-	})
+	// Remove the campaign ID from the NGO's campaigns array
+	ngoRef := db.FirestoreClient.Collection(ngosCollection).Doc(ngoID)
+	err = db.FirestoreClient.RunTransaction(context.Background(), func(ctx context.Context, tx *firestore.Transaction) error {
+		// Get the current campaigns array of the NGO
+		docSnap, err := tx.Get(ngoRef)
+		if err != nil {
+			return err
+		}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Donor removed from the campaign successfully"})
+		var ngo models.NGO
+		if err := docSnap.DataTo(&ngo); err != nil {
+			return err
+		}
+
+		// Find and remove the campaign ID from the array
+		var updatedCampaigns []string
+		for _, cID := range ngo.Campaigns {
+			if cID != campaignID {
+				updatedCampaigns = append(updatedCampaigns, cID)
+			}
+		}
+		ngo.Campaigns = updatedCampaigns
+
+		// Update the NGO document in Firestore
+		if err := tx.Set(ngoRef, ngo); err != nil {
+			return err
+		}
+
+		return nil
+	})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update NGO"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Campaign deleted successfully"})
 }

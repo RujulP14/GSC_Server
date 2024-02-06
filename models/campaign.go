@@ -1,13 +1,13 @@
 package models
 
 type Donor struct {
-	DonorUID      string `json:"donorUid"`
-	TransactionID string `json:"transactionId"`
+	DonorID       string `json:"donorID"`
+	TransactionID string `json:"transactionID"`
 }
 
 type Campaign struct {
-	UID         string  `json:"uid"`
-	NGO_ID      string  `json:"ngoUid"`
+	ID          string  `json:"id"`
+	NGO_ID      string  `json:"ngoID"`
 	Title       string  `json:"title"`
 	Description string  `json:"description"`
 	ImageURL    string  `json:"imageUrl"`

@@ -16,47 +16,46 @@ import (
 
 const ngosCollection = "ngos"
 
-func CreateNGO(c *gin.Context) {
-   var ngo models.NGO
-   if err := c.ShouldBindJSON(&ngo); err != nil {
-      c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-      return
-   }
+func SignupNGO(c *gin.Context) {
+	var ngo models.NGO
+	if err := c.ShouldBindJSON(&ngo); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
-   // Hash the NGO's password
-   hashedPassword, err := utils.HashPassword(ngo.PasswordHash)
-   if err != nil {
-      c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
-      return
-   }
+	// Hash the NGO's password
+	hashedPassword, err := utils.HashPassword(ngo.PasswordHash)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
+		return
+	}
 
-   // Set the hashed password
-   ngo.PasswordHash = hashedPassword
+	// Set the hashed password
+	ngo.PasswordHash = hashedPassword
 
-   // Omitting the ID field to let Firebase generate a unique ID
-   docRef, _, err := db.FirestoreClient.Collection(ngosCollection).Add(context.Background(), ngo)
-   if err != nil {
-      c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create NGO"})
-      return
-   }
-   // Retrieve the generated default UID from the Firestore document reference
-   uid := docRef.ID
+	// Omitting the ID field to let Firebase generate a unique ID
+	docRef, _, err := db.FirestoreClient.Collection(ngosCollection).Add(context.Background(), ngo)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create NGO"})
+		return
+	}
+	// Retrieve the generated default UID from the Firestore document reference
+	id := docRef.ID
 
-   // Set the UID in the model
-   ngo.UID = uid
+	// Set the UID in the model
+	ngo.ID = id
 
-   // Update the UID in Firestore
+	// Update the UID in Firestore
 	_, err = docRef.Update(context.Background(), []firestore.Update{
-		{Path: "UID", Value: uid},
+		{Path: "ID", Value: id},
 	})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update UID in Firestore"})
 		return
 	}
-   
-   c.JSON(http.StatusCreated, gin.H{"message": "NGO created successfully", "uid": uid})
-}
 
+	c.JSON(http.StatusCreated, gin.H{"message": "NGO created successfully", "id": id})
+}
 
 func UpdateNGO(c *gin.Context) {
 	ngoID := c.Param("id")
@@ -89,7 +88,6 @@ func UpdateNGO(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "NGO updated successfully"})
 }
-
 
 func GetNGO(c *gin.Context) {
 	ngoID := c.Param("id")

@@ -8,7 +8,7 @@ import (
 )
 
 func SetupCampaignRoutes(router *gin.Engine) {
-	campaignGroup := router.Group("/api/campaign")
+	campaignGroup := router.Group("/api/campaigns")
 	{
 		campaignGroup.POST("/", controllers.CreateCampaign)
 		campaignGroup.GET("/:id", controllers.GetCampaign)
@@ -16,7 +16,5 @@ func SetupCampaignRoutes(router *gin.Engine) {
 		campaignGroup.PUT("/:id", controllers.UpdateCampaign)
 		campaignGroup.DELETE("/:id", controllers.DeleteCampaign)
 		campaignGroup.PATCH("/:id/update-image", controllers.UpdateCampaignImage)
-		campaignGroup.PATCH("/:id/add-donor", controllers.AddDonorToCampaign)
-		campaignGroup.PATCH("/:id/remove-donor", controllers.RemoveDonorFromCampaign)
 	}
 }

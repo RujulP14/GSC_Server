@@ -33,6 +33,7 @@ func main() {
 	routes.SetupNGORoutes(router)
 	routes.SetupChatbotRoutes(router)
 	routes.SetupCampaignRoutes(router)
+	routes.SetupStripeRoutes(router)
 
 	// Run the server
 	port := os.Getenv("PORT")

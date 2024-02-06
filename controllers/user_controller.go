@@ -52,26 +52,21 @@ func SignupUser(c *gin.Context) {
 	}
 
 	// Retrieve the generated default UID from the Firestore document reference
-	uid := docRef.ID
+	id := docRef.ID
 
-	// Set the UID in the model
-	user.UID = uid
+	// Set the id in the model
+	user.ID = id
 
-	// Update the UID in Firestore
+	// Update the id in Firestore
 	_, err = docRef.Update(context.Background(), []firestore.Update{
-		{Path: "UID", Value: uid},
+		{Path: "ID", Value: id},
 	})
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update UID in Firestore"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update id in Firestore"})
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"message": "User created successfully", "uid": uid})
-}
-
-func GoogleLogin(c *gin.Context) {
-	// Implement Google login logic here
-	c.JSON(http.StatusOK, gin.H{"message": "Google login endpoint"})
+	c.JSON(http.StatusCreated, gin.H{"message": "User created successfully", "id": id})
 }
 
 func GetUser(c *gin.Context) {

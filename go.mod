@@ -6,6 +6,7 @@ require (
 	cloud.google.com/go/firestore v1.14.0
 	github.com/gin-gonic/gin v1.9.1
 	github.com/joho/godotenv v1.5.1
+	github.com/stripe/stripe-go/v76 v76.15.0
 	golang.org/x/crypto v0.18.0
 	google.golang.org/api v0.156.0
 )
