@@ -4,10 +4,19 @@ go 1.21.6
 
 require (
 	cloud.google.com/go/firestore v1.14.0
+	github.com/gin-contrib/cors v1.5.0
 	github.com/gin-gonic/gin v1.9.1
 	github.com/joho/godotenv v1.5.1
+	github.com/stripe/stripe-go/v76 v76.15.0
 	golang.org/x/crypto v0.18.0
 	google.golang.org/api v0.156.0
+)
+
+require (
+	cloud.google.com/go/iam v1.1.5 // indirect
+	cloud.google.com/go/storage v1.36.0 // indirect
+	github.com/google/uuid v1.5.0 // indirect
+	github.com/kr/text v0.2.0 // indirect
 )
 
 require (
@@ -15,6 +24,7 @@ require (
 	cloud.google.com/go/compute v1.23.3 // indirect
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
 	cloud.google.com/go/longrunning v0.5.4 // indirect
+	firebase.google.com/go v3.13.0+incompatible
 	github.com/bytedance/sonic v1.10.2 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20230717121745-296ad89f973d // indirect
 	github.com/chenzhuoyu/iasm v0.9.1 // indirect

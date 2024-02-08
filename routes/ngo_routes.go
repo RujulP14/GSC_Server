@@ -8,13 +8,13 @@ import (
 )
 
 func SetupNGORoutes(router *gin.Engine) {
-   ngoGroup := router.Group("/api/ngo")
-   {
-      ngoGroup.POST("/", controllers.CreateNGO)
-      ngoGroup.GET("/:id", controllers.GetNGO)
-      ngoGroup.GET("/", controllers.GetNGOs)
-      ngoGroup.PUT("/:id", controllers.UpdateNGO)
-      ngoGroup.DELETE("/:id", controllers.DeleteNGO)
-      ngoGroup.POST("/login", controllers.LoginNGO)
-   }
+	ngoGroup := router.Group("/api/ngos")
+	{
+		ngoGroup.POST("/signup", controllers.SignupNGO)
+		ngoGroup.GET("/:id", controllers.GetNGO)
+		ngoGroup.GET("/", controllers.GetNGOs)
+		ngoGroup.PUT("/:id", controllers.UpdateNGO)
+		ngoGroup.DELETE("/:id", controllers.DeleteNGO)
+		ngoGroup.POST("/login", controllers.LoginNGO)
+	}
 }

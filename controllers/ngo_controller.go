@@ -9,54 +9,56 @@ import (
 	"Server/models"
 	"Server/utils"
 
-	"cloud.google.com/go/firestore"
+	"firebase.google.com/go/auth"
 	"github.com/gin-gonic/gin"
 	"google.golang.org/api/iterator"
 )
 
 const ngosCollection = "ngos"
 
-func CreateNGO(c *gin.Context) {
-   var ngo models.NGO
-   if err := c.ShouldBindJSON(&ngo); err != nil {
-      c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-      return
-   }
-
-   // Hash the NGO's password
-   hashedPassword, err := utils.HashPassword(ngo.PasswordHash)
-   if err != nil {
-      c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
-      return
-   }
-
-   // Set the hashed password
-   ngo.PasswordHash = hashedPassword
-
-   // Omitting the ID field to let Firebase generate a unique ID
-   docRef, _, err := db.FirestoreClient.Collection(ngosCollection).Add(context.Background(), ngo)
-   if err != nil {
-      c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create NGO"})
-      return
-   }
-   // Retrieve the generated default UID from the Firestore document reference
-   uid := docRef.ID
-
-   // Set the UID in the model
-   ngo.UID = uid
-
-   // Update the UID in Firestore
-	_, err = docRef.Update(context.Background(), []firestore.Update{
-		{Path: "UID", Value: uid},
-	})
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update UID in Firestore"})
+func SignupNGO(c *gin.Context) {
+	// Bind JSON request body to the NGO model
+	var ngo models.NGO
+	if err := c.ShouldBindJSON(&ngo); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-   
-   c.JSON(http.StatusCreated, gin.H{"message": "NGO created successfully", "uid": uid})
-}
 
+	// Hash the NGO's password
+	hashedPassword, err := utils.HashPassword(ngo.PasswordHash)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
+		return
+	}
+
+	// Set the hashed password
+	ngo.PasswordHash = hashedPassword
+
+	// Create NGO in Firebase Authentication
+	params := (&auth.UserToCreate{}).
+		Email(ngo.Email).
+		Password(ngo.PasswordHash).
+		DisplayName(ngo.Profile.NGOName).
+		Disabled(false)
+
+	ngoUserRecord, err := db.AuthClient.CreateUser(ctx, params)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create NGO user in Firebase Authentication"})
+		return
+	}
+
+	// Set the UID from Firebase Authentication to the NGO model
+	ngo.ID = ngoUserRecord.UserInfo.UID
+
+	// Create NGO in Firestore
+	docRef, _, err := db.FirestoreClient.Collection(ngosCollection).Add(ctx, ngo)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create NGO in Firestore"})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{"message": "NGO created successfully", "id": docRef.ID})
+}
 
 func UpdateNGO(c *gin.Context) {
 	ngoID := c.Param("id")
@@ -89,7 +91,6 @@ func UpdateNGO(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "NGO updated successfully"})
 }
-
 
 func GetNGO(c *gin.Context) {
 	ngoID := c.Param("id")
@@ -132,10 +133,24 @@ func GetNGOs(c *gin.Context) {
 
 func DeleteNGO(c *gin.Context) {
 	ngoID := c.Param("id")
+	authID, err := getNGOAuthIDByFirestoreID(ngoID)
 
-	_, err := db.FirestoreClient.Collection(ngosCollection).Doc(ngoID).Delete(context.Background())
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete NGO"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve auth ID from Firestore"})
+		return
+	}
+
+	// Delete NGO from Authentication
+	err = db.AuthClient.DeleteUser(context.Background(), authID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete NGO from Authentication"})
+		return
+	}
+
+	// Delete the NGO document using the retrieved document ID
+	_, err = db.FirestoreClient.Collection(ngosCollection).Doc(ngoID).Delete(context.Background())
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete NGO from Firestore"})
 		return
 	}
 
@@ -191,4 +206,14 @@ func GetNGOByEmail(email string) (models.NGO, error) {
 	}
 
 	return ngo, nil
+}
+
+// getNGOAuthIDByFirestoreID retrieves the authentication ID associated with the given Firestore ID for NGO
+func getNGOAuthIDByFirestoreID(id string) (string, error) {
+	doc, err := db.FirestoreClient.Collection(ngosCollection).Doc(id).Get(ctx)
+	if err != nil {
+		return "", err
+	}
+
+	return doc.Data()["ID"].(string), nil
 }
