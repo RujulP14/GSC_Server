@@ -4,6 +4,7 @@ go 1.21.6
 
 require (
 	cloud.google.com/go/firestore v1.14.0
+	github.com/gin-contrib/cors v1.5.0
 	github.com/gin-gonic/gin v1.9.1
 	github.com/joho/godotenv v1.5.1
 	github.com/stripe/stripe-go/v76 v76.15.0
@@ -15,6 +16,7 @@ require (
 	cloud.google.com/go/iam v1.1.5 // indirect
 	cloud.google.com/go/storage v1.36.0 // indirect
 	github.com/google/uuid v1.5.0 // indirect
+	github.com/kr/text v0.2.0 // indirect
 )
 
 require (
