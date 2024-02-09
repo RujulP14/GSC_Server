@@ -31,6 +31,7 @@ Before you begin, make sure you have the following installed:
 
 - [Golang](https://golang.org/doc/install)
 - [Firebase](https://firebase.google.com/docs/cli)
+- [Gcloud](https://cloud.google.com/sdk/docs/install)
 
 ### Installation
 
@@ -46,13 +47,19 @@ Before you begin, make sure you have the following installed:
    cd server-api
 ```
 
-3. **Install dependencies:**
+3. **Setup default credentials:**
+
+```bash
+   gcloud auth application-default login
+```
+
+4. **Install dependencies:**
 
 ```bash
    go mod download
 ```
 
-4. **Run the application:**
+5. **Run the server:**
 
 ```bash
     go run server.go
@@ -63,15 +70,39 @@ Before you begin, make sure you have the following installed:
 ###### Base URL:
 
 ```
-http://localhost:8080
+http://localhost:8000/api
 ```
 
 #### User
 
-1. **Create User:**
+1. **Signup User:**
 
 ```
-POST /api/user/
+POST /users/signup/
+Content-Type: application/json
+
+{
+    "email": "vbhatnagar@gmail.com",
+    "password": "1shaj",
+    "profile": {
+        "firstName": "Vanshaj",
+        "lastName": "Bhatnagar"
+    }
+}
+```
+
+```
+Response example
+{
+    "id": "qid9wiB26SeV5wjx3XIp",
+    "message": "User created successfully"
+}
+```
+
+2. **Login User:**
+
+```
+POST /users/login/
 Content-Type: application/json
 
 {
@@ -80,71 +111,140 @@ Content-Type: application/json
 }
 ```
 
-2. **Update User:**
-
 ```
-PUT /api/user/:id
-Content-Type: application/json
-
+Response example
 {
-  "email": "user@example.com",
-  "password": "secretpassword"
+    "message": "Login successful",
+    "user": {
+        "id": "ofbmb53DAlb7EMQAswDfXTJ1eno1",
+        "email": "vbhatnagar@gmail.com",
+        "password": "$2a$10$6J06PxI1tOVFuULQarN4..wA59NJLDhv0Mx4qfSh6gTu9OFZLpgwi",
+        "profile": {
+            "firstName": "Vanshaj",
+            "lastName": "Bhatnagar",
+            "dob": "",
+            "profileImage": ""
+        },
+        "donations": null
+    }
 }
 ```
 
-3. **Delete User:**
+3. **Update User:**
 
 ```
-DELETE /api/user/:id
-```
-
-4. **Get All user:**
-
-```
-GET /api/user/
-```
-
-5. **Get Particular User:**
-
-```
-GET /api/user/:id
-```
-
-6. **Login User:**
-
-```
-POST /api/user/login
+PUT /users/:id/
 Content-Type: application/json
 
 {
-  "email": "user@example.com",
-  "password": "secretpassword"
+    "firstName": "vanshaj"
 }
+```
+
+```
+Response example
+{
+    "message": "User updated successfully"
+}
+```
+
+4. **Delete User:**
+
+```
+DELETE /users/:id/
+```
+
+```
+Response example
+{
+    "message": "User deleted successfully"
+}
+```
+
+5. **Get All user:**
+
+```
+GET /users/
+```
+
+6. **Get Particular User:**
+
+```
+GET /users/:id/
 ```
 
 #### NGO
 
-1. **Create NGO:**
+1. **Signup NGO:**
 
 ```
-POST /api/ngo/
+POST /ngos/signup/
 Content-Type: application/json
 
 {
-  "email": "ngo@example.com",
-  "password": "secretpassword",
-  "profile: {}
+    "email": "ngo@gmail.com",
+    "password": "ngo123",
+    "profile": {
+        "ngoName": "NGO 123"
+    }
 }
 ```
 
-2. **Update NGO:**
+```
+Response example
+{
+    "id": "QKVyBXUgYgaClRnaKjnZ",
+    "message": "NGO created successfully"
+}
+```
+
+2. **Login NGO:**
 
 ```
-PUT /api/ngo/:id
+POST /ngos/login/
+Content-Type: application/json
+
+{
+    "email": "ngo@gmail.com",
+    "password": "ngo123"
+}
+```
+
+```
+Response example
+{
+    "message": "Login successful",
+    "ngo": {
+        "id": "7NYWU0wKM6OFBCrxtpAoBkIL4dl1",
+        "email": "ngo@gmail.com",
+        "password": "$2a$10$OJS7M2MRmgeKgFaQe5AxF.T8WvtQZ8PPxNLP7JaEn.mQU07kqIFry",
+        "profile": {
+            "registrationNumber": "",
+            "ngoName": "NGO 123",
+            "worksFor": "",
+            "address": "",
+            "pincode": "",
+            "city": "",
+            "state": "",
+            "country": "",
+            "phoneNumber": "",
+            "description": "",
+            "logo": ""
+        },
+        "campaigns": null
+    }
+}
+```
+
+3. **Update NGO:**
+
+```
+PUT /ngos/:id/
 Content-Type: application/json
 
 {
     "profile": {
+        "registrationNumber": "reg1234",
         "ngoName": "NGO 123",
         "worksFor": "Females",
         "address": "address 123, address 456",
@@ -157,36 +257,26 @@ Content-Type: application/json
         "logo": "logo.png"
     }
 }
-```
-
-3. **Delete NGO:**
 
 ```
-DELETE /api/ngo/:id
-```
 
-4. **Get All NGOs:**
+4. **Delete NGO:**
 
 ```
-GET /api/ngo/
+DELETE /ngos/:id/
 ```
 
-5. **Get Particular NGO:**
+5. **Get All NGOs:**
 
 ```
-GET /api/ngo/:id
-```
-
-6. **Login NGO:**
+GET /ngos/
 
 ```
-POST /api/ngo/login
-Content-Type: application/json
 
-{
-  "email": "ngo@example.com",
-  "password": "secretpassword"
-}
+6. **Get Particular NGO:**
+
+```
+GET /ngos/:id/
 ```
 
 #### Chatbot
@@ -194,17 +284,17 @@ Content-Type: application/json
 1. **Get Chatbot Response**
 
 ```
-GET /api/chatbot
+GET /chatbot
 Content-type: application/json
 
 {
-  "inputText": "What is menstruation cycle?"
+    "inputText": "What is menstruation"
 }
 ```
 
 ```
-Response format
+Response example
 {
-  "output: "The menstrual cycle is the regular natural change that occurs in the female reproductive system that makes pregnancy possible. The cycle is regulated by the female sex hormones estrogen and progesterone."
+    "text": "Menstruation is the natural process of shedding the lining of the uterus (womb). It occurs when a woman is not pregnant. Menstruation is also known as a period.\n\nThe menstrual cycle is a complex process that is controlled by hormones. Each month, the ovaries release an egg (ovulation).
 }
 ```
