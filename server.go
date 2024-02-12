@@ -36,7 +36,7 @@ func main() {
 	routes.SetupUserRoutes(router)
 	routes.SetupNGORoutes(router)
 	routes.SetupChatbotRoutes(router)
-	routes.SetupCampaignRoutes(router)
+	routes.SetupInitiativeRoutes(router)
 	routes.SetupStripeRoutes(router)
 
 	// Run the server

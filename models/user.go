@@ -9,6 +9,7 @@ type Donation struct {
 type UserProfile struct {
 	FirstName    string `json:"firstName"`
 	LastName     string `json:"lastName"`
+	PhoneNumber  string `json:"phoneNumber"`
 	Dob          string `json:"dob"`
 	ProfileImage string `json:"profileImage"`
 }

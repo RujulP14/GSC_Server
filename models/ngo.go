@@ -20,5 +20,5 @@ type NGO struct {
 	Email        string     `json:"email"`
 	PasswordHash string     `json:"password"`
 	Profile      NGOProfile `json:"profile"`
-	Campaigns    []string   `json:"campaigns"`
+	Initiatives  []string   `json:"initiatives"`
 }
