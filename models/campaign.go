@@ -5,7 +5,7 @@ type Donor struct {
 	TransactionID string `json:"transactionID"`
 }
 
-type Initiative struct {
+type Campaign struct {
 	ID           string  `json:"id"`
 	NGO_ID       string  `json:"ngoID"`
 	Title        string  `json:"title"`

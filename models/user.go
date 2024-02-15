@@ -20,4 +20,5 @@ type User struct {
 	PasswordHash string      `json:"password"`
 	Profile      UserProfile `json:"profile"`
 	Donations    []Donation  `json:"donations"`
+	MyEvents     []string    `json:"myEvents"`
 }
