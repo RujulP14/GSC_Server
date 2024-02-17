@@ -10,7 +10,6 @@ type Campaign struct {
 	NGO_ID       string  `json:"ngoID"`
 	Title        string  `json:"title"`
 	Description  string  `json:"description"`
-	InitiaveType string  `json:"initiativeType"`
 	ImageURL     string  `json:"imageUrl"`
 	RaisedMoney  float64 `json:"raisedMoney"`
 	TotalGoal    float64 `json:"totalGoal"`
