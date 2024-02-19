@@ -39,6 +39,7 @@ func main() {
 	routes.SetupCampaignRoutes(router)
 	routes.SetupEventRoutes(router)
 	routes.SetupStripeRoutes(router)
+	routes.SetupArticleRoutes(router)
 
 	// Run the server
 	port := os.Getenv("PORT")
