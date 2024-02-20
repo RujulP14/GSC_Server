@@ -122,7 +122,6 @@ func DeleteArticle(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Article deleted successfully"})
 }
 
-// AddComment adds a new comment to an article
 func AddCommentOnArticle(c *gin.Context) {
 	articleID := c.Param("id")
 
@@ -136,7 +135,7 @@ func AddCommentOnArticle(c *gin.Context) {
 	comment.Commented = time.Now()
 
 	// Update the article document to add the comment to the comments array
-	_, err := db.FirestoreClient.Collection("articles").Doc(articleID).Update(context.Background(), []firestore.Update{
+	_, err := db.FirestoreClient.Collection(articlesCollection).Doc(articleID).Update(context.Background(), []firestore.Update{
 		{Path: "Comments", Value: firestore.ArrayUnion(comment)},
 	})
 	if err != nil {
@@ -147,7 +146,6 @@ func AddCommentOnArticle(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"message": "Comment added successfully"})
 }
 
-// RemoveComment removes a comment from an article
 func RemoveCommentOnArticle(c *gin.Context) {
 	articleID := c.Param("id")
 	commentID := c.Query("commentID")

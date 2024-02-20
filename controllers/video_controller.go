@@ -119,7 +119,6 @@ func DeleteVideo(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Video deleted successfully"})
 }
 
-// AddCommentOnVideo adds a new comment to a video
 func AddCommentOnVideo(c *gin.Context) {
 	videoID := c.Param("id")
 
@@ -133,9 +132,8 @@ func AddCommentOnVideo(c *gin.Context) {
 	comment.Commented = time.Now()
 
 	// Update the video document to add the comment to the comments array
-	commentUpdate := firestore.ArrayUnion([]interface{}{comment})
-	_, err := db.FirestoreClient.Collection("videos").Doc(videoID).Update(context.Background(), []firestore.Update{
-		{Path: "Comments", Value: commentUpdate},
+	_, err := db.FirestoreClient.Collection(videosCollection).Doc(videoID).Update(context.Background(), []firestore.Update{
+		{Path: "Comments", Value: firestore.ArrayUnion(comment)},
 	})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -145,24 +143,53 @@ func AddCommentOnVideo(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"message": "Comment added successfully"})
 }
 
-// RemoveCommentOnVideo removes a comment from a video
 func RemoveCommentOnVideo(c *gin.Context) {
 	videoID := c.Param("id")
-	commentID := c.Param("commentID")
+	commentID := c.Query("commentID")
 
-	// Remove comment from video in Firestore
-	_, err := db.FirestoreClient.Collection("videos").Doc(videoID).Update(context.Background(), []firestore.Update{
-		{Path: "Comments", Value: firestore.ArrayRemove(commentID)},
-	})
+	// Get the video document from Firestore
+	videoRef := db.FirestoreClient.Collection(videosCollection).Doc(videoID)
+	videoSnap, err := videoRef.Get(context.Background())
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to remove comment"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve video"})
+		return
+	}
+
+	// Parse the video data into a struct
+	var video models.Video
+	if err := videoSnap.DataTo(&video); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse video data"})
+		return
+	}
+
+	// Find the index of the comment with the specified commentID
+	var commentIndex = -1
+	for i, comment := range video.Comments {
+		if comment.CommentID == commentID {
+			commentIndex = i
+			break
+		}
+	}
+
+	// Check if the commentID exists in the video's comments array
+	if commentIndex == -1 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Comment not found"})
+		return
+	}
+
+	// Remove the comment from the comments array
+	video.Comments = append(video.Comments[:commentIndex], video.Comments[commentIndex+1:]...)
+
+	// Update the video document back in Firestore
+	_, err = videoRef.Set(context.Background(), video)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update video"})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Comment removed successfully"})
 }
 
-// LikeVideo increments the likes count of a video
 func LikeVideo(c *gin.Context) {
 	videoID := c.Param("id")
 

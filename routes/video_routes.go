@@ -18,7 +18,7 @@ func SetupVideoRoutes(router *gin.Engine) {
 		videoGroup.DELETE("/:id", controllers.DeleteVideo)
 
 		videoGroup.POST("/:id/comments", controllers.AddCommentOnVideo)
-		videoGroup.DELETE("/:id/comments/:commentID", controllers.RemoveCommentOnVideo)
+		videoGroup.DELETE("/:id/comments", controllers.RemoveCommentOnVideo)
 		videoGroup.POST("/:id/like", controllers.LikeVideo)
 	}
 }
