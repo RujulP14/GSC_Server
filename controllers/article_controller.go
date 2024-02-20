@@ -123,7 +123,7 @@ func DeleteArticle(c *gin.Context) {
 }
 
 // AddComment adds a new comment to an article
-func AddComment(c *gin.Context) {
+func AddCommentOnArticle(c *gin.Context) {
 	articleID := c.Param("id")
 
 	var comment models.Comment
@@ -148,7 +148,7 @@ func AddComment(c *gin.Context) {
 }
 
 // RemoveComment removes a comment from an article
-func RemoveComment(c *gin.Context) {
+func RemoveCommentOnArticle(c *gin.Context) {
 	articleID := c.Param("id")
 	commentID := c.Query("commentID")
 
