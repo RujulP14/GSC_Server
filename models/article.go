@@ -4,21 +4,22 @@ package models
 import "time"
 
 type Article struct {
-	ID           string    `firestore:"id"`
-	Title        string    `firestore:"title"`
-	AuthorName   string    `firestore:"author_name"`
-	UploadDate   time.Time `firestore:"upload_date"`
-	Content      string    `firestore:"content"`
-	Tags         []string  `firestore:"tags"`
-	Category     string    `firestore:"category"`
-	ThumbnailURL string    `firestore:"thumbnail_url"`
-	Comments     []Comment `firestore:"comments"`
-	Likes        int       `firestore:"likes"`
+	ID           string    `json:"id"`
+	Title        string    `json:"title"`
+	AuthorName   string    `json:"authorName"`
+	UploadDate   time.Time `json:"uploadDate"`
+	Content      string    `json:"content"`
+	Tags         []string  `json:"tags"`
+	Category     string    `json:"category"`
+	ThumbnailURL string    `json:"thumbnailUrl"`
+	Comments     []Comment `json:"comments"`
+	Likes        int       `json:"likes"`
 }
 
 // Comment model
 type Comment struct {
-	UserID    string    `firestore:"user_id"`
-	Content   string    `firestore:"content"`
-	Commented time.Time `firestore:"commented"`
+	CommentID string    `json:"commentID"`
+	UserID    string    `json:"userID"`
+	Content   string    `json:"content"`
+	Commented time.Time `json:"commented"`
 }

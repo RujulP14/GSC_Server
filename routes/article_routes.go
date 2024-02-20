@@ -15,9 +15,8 @@ func SetupArticleRoutes(router *gin.Engine) {
 		articleGroup.GET("/:id", controllers.GetArticle)
 		articleGroup.PUT("/:id", controllers.UpdateArticle)
 		articleGroup.DELETE("/:id", controllers.DeleteArticle)
-		// articleGroup.POST("/:id/comments", controllers.AddComment)
-		// articleGroup.DELETE("/:id/comments/:commentID", controllers.RemoveComment)
-		// articleGroup.POST("/:id/like", controllers.LikeArticle)
-		// articleGroup.POST("/:id/unlike", controllers.UnlikeArticle)
+
+		articleGroup.POST("/:id/comments", controllers.AddComment)
+		articleGroup.DELETE("/:id/comments", controllers.RemoveComment)
 	}
 }
