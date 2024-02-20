@@ -11,6 +11,7 @@ import (
 
 	"cloud.google.com/go/firestore"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"google.golang.org/api/iterator"
 )
 
@@ -121,6 +122,7 @@ func DeleteArticle(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Article deleted successfully"})
 }
 
+// AddComment adds a new comment to an article
 func AddComment(c *gin.Context) {
 	articleID := c.Param("id")
 
@@ -129,70 +131,66 @@ func AddComment(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
-	// Set commented time
+	// Generate a unique comment ID
+	comment.CommentID = uuid.New().String()
 	comment.Commented = time.Now()
 
-	// Add comment to the article in Firestore
-	_, err := db.FirestoreClient.Collection(articlesCollection).Doc(articleID).Update(context.Background(), []firestore.Update{
-		{Path: "comments", Value: firestore.ArrayUnion(comment)},
+	// Update the article document to add the comment to the comments array
+	_, err := db.FirestoreClient.Collection("articles").Doc(articleID).Update(context.Background(), []firestore.Update{
+		{Path: "Comments", Value: firestore.ArrayUnion(comment)},
 	})
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to add comment"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
 	c.JSON(http.StatusCreated, gin.H{"message": "Comment added successfully"})
 }
 
+// RemoveComment removes a comment from an article
 func RemoveComment(c *gin.Context) {
 	articleID := c.Param("id")
-	commentID := c.Param("commentID")
+	commentID := c.Query("commentID")
 
-	// Remove comment from article in Firestore
-	_, err := db.FirestoreClient.Collection(articlesCollection).Doc(articleID).Update(context.Background(), []firestore.Update{
-		{Path: "comments", Value: firestore.ArrayRemove(commentID)},
-	})
+	// Get the article document from Firestore
+	articleRef := db.FirestoreClient.Collection("articles").Doc(articleID)
+	articleSnap, err := articleRef.Get(context.Background())
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to remove comment"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve article"})
+		return
+	}
+
+	// Parse the article data into a struct
+	var article models.Article
+	if err := articleSnap.DataTo(&article); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse article data"})
+		return
+	}
+
+	// Find the index of the comment with the specified commentID
+	var commentIndex = -1
+	for i, comment := range article.Comments {
+		if comment.CommentID == commentID {
+			commentIndex = i
+			break
+		}
+	}
+
+	// Check if the commentID exists in the article's comments array
+	if commentIndex == -1 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Comment not found"})
+		return
+	}
+
+	// Remove the comment from the comments array
+	article.Comments = append(article.Comments[:commentIndex], article.Comments[commentIndex+1:]...)
+
+	// Update the article document back in Firestore
+	_, err = articleRef.Set(context.Background(), article)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update article"})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Comment removed successfully"})
-}
-
-func LikeArticle(c *gin.Context) {
-	articleID := c.Param("id")
-
-	// Get user ID (assuming it's available in the context)
-	userID := "USER_ID_PLACEHOLDER" // Example: retrieving user ID from middleware
-
-	// Update article's likedBy array with the user's ID
-	_, err := db.FirestoreClient.Collection(articlesCollection).Doc(articleID).Update(context.Background(), []firestore.Update{
-		{Path: "likedBy", Value: firestore.ArrayUnion(userID)},
-	})
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to like article"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "Article liked successfully"})
-}
-
-func UnlikeArticle(c *gin.Context) {
-	articleID := c.Param("id")
-
-	// Get user ID (assuming it's available in the context)
-	userID := "USER_ID_PLACEHOLDER" // Example: retrieving user ID from middleware
-
-	// Update article's likedBy array by removing the user's ID
-	_, err := db.FirestoreClient.Collection(articlesCollection).Doc(articleID).Update(context.Background(), []firestore.Update{
-		{Path: "likedBy", Value: firestore.ArrayRemove(userID)},
-	})
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to unlike article"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "Article unliked successfully"})
 }
