@@ -15,10 +15,12 @@ type UserProfile struct {
 }
 
 type User struct {
-	ID           string      `json:"id"`
-	Email        string      `json:"email"`
-	PasswordHash string      `json:"password"`
-	Profile      UserProfile `json:"profile"`
-	Donations    []Donation  `json:"donations"`
-	MyEvents     []string    `json:"myEvents"`
+	ID                string      `json:"id"`
+	AuthID            string      `json:"authID"`
+	Email             string      `json:"email"`
+	PasswordHash      string      `json:"password"`
+	Profile           UserProfile `json:"profile"`
+	Donations         []Donation  `json:"donations"`
+	MyEvents          []string    `json:"myEvents"`
+	FavouriteArticles []string    `json:"favouriteArticles"`
 }
