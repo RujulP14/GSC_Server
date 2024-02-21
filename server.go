@@ -41,6 +41,7 @@ func main() {
 	routes.SetupStripeRoutes(router)
 	routes.SetupArticleRoutes(router)
 	routes.SetupVideoRoutes(router)
+	routes.SetupBlogRoutes(router)
 
 	// Run the server
 	port := os.Getenv("PORT")
