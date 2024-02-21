@@ -6,6 +6,7 @@ import "time"
 type Video struct {
 	ID           string    `json:"id"`
 	Title        string    `json:"title"`
+	VideoURL     string    `json:"videoUrl"`
 	Uploader     string    `json:"uploader"`
 	UploadDate   time.Time `json:"uploadDate"`
 	Description  string    `json:"description"`
