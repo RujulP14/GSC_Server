@@ -23,4 +23,6 @@ type User struct {
 	Donations         []Donation  `json:"donations"`
 	MyEvents          []string    `json:"myEvents"`
 	FavouriteArticles []string    `json:"favouriteArticles"`
+	FavouriteBlogs    []string    `json:"favouriteBlogs"`
+	FavouriteVideos   []string    `json:"favouriteVideos"`
 }
