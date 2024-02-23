@@ -3,6 +3,7 @@ package controllers
 
 import (
 	"context"
+	"log"
 	"net/http"
 
 	"Server/db"
@@ -295,6 +296,36 @@ func RemoveFromFavorites(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Article removed from favorites successfully"})
+}
+
+// Fetches all the blogs created by a particular user
+func GetUserBlogs(c *gin.Context) {
+	userID := c.Param("id")
+
+	// Query Firestore to retrieve blogs created by the user
+	iter := db.FirestoreClient.Collection("blogs").Where("AuthorID", "==", userID).Documents(context.Background())
+	var blogs []models.Blog
+	for {
+		doc, err := iter.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve blogs"})
+			return
+		}
+
+		var blog models.Blog
+		if err := doc.DataTo(&blog); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse blog data"})
+			return
+		}
+
+		blogs = append(blogs, blog)
+	}
+	log.Println(blogs)
+
+	c.JSON(http.StatusOK, blogs)
 }
 
 func getUserByEmail(email string) (*models.User, error) {
