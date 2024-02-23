@@ -18,7 +18,15 @@ func SetupUserRoutes(router *gin.Engine) {
 		userGroup.POST("/signup", controllers.SignupUser)
 		userGroup.POST("/login", controllers.LoginUser)
 
-		userGroup.POST("/:id/favourite-article", controllers.AddToFavorites)
-		userGroup.DELETE("/:id/favourite-article", controllers.RemoveFromFavorites)
+		userGroup.POST("/:id/favourite-article", controllers.AddToFavouritesArticles)
+		userGroup.DELETE("/:id/favourite-article", controllers.RemoveFromFavouritesArticles)
+
+		userGroup.POST("/:id/favourite-blog", controllers.AddToFavouriteBlogs)
+		userGroup.DELETE("/:id/favourite-blog", controllers.RemoveFromFavouriteBlogs)
+
+		userGroup.POST("/:id/favourite-video", controllers.AddToFavouriteVideos)
+		userGroup.DELETE("/:id/favourite-video", controllers.RemoveFromFavouriteVideos)
+
+		userGroup.GET("/:id/blogs", controllers.GetUserBlogs)
 	}
 }

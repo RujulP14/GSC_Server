@@ -3,12 +3,14 @@ package controllers
 
 import (
 	"context"
+	"log"
 	"net/http"
 
 	"Server/db"
 	"Server/models"
 	"Server/utils" // Import the utils package
 
+	"cloud.google.com/go/firestore"
 	"firebase.google.com/go/auth"
 	"github.com/gin-gonic/gin"
 	"google.golang.org/api/iterator"
@@ -218,7 +220,7 @@ func DeleteUser(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "User deleted successfully"})
 }
 
-func AddToFavorites(c *gin.Context) {
+func AddToFavouritesArticles(c *gin.Context) {
 	userID := c.Param("id")
 	articleID := c.Query("articleID")
 
@@ -236,7 +238,7 @@ func AddToFavorites(c *gin.Context) {
 		return
 	}
 
-	// Add the article ID to favorites
+	// Add the article ID to favourites
 	user.FavouriteArticles = append(user.FavouriteArticles, articleID)
 
 	// Update the user document in Firestore
@@ -246,10 +248,10 @@ func AddToFavorites(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Article added to favorites successfully"})
+	c.JSON(http.StatusOK, gin.H{"message": "Article added to favourites successfully"})
 }
 
-func RemoveFromFavorites(c *gin.Context) {
+func RemoveFromFavouritesArticles(c *gin.Context) {
 	userID := c.Param("id")
 	articleID := c.Query("articleID")
 
@@ -267,25 +269,25 @@ func RemoveFromFavorites(c *gin.Context) {
 		return
 	}
 
-	// Check if the article is in favorites
-	var isFavorite bool
-	var updatedFavorites []string
+	// Check if the article is in favourites
+	var isFavourite bool
+	var updatedFavourites []string
 	for _, favArticleID := range user.FavouriteArticles {
 		if favArticleID == articleID {
-			isFavorite = true
+			isFavourite = true
 		} else {
-			updatedFavorites = append(updatedFavorites, favArticleID)
+			updatedFavourites = append(updatedFavourites, favArticleID)
 		}
 	}
 
-	// If the article is not in favorites, return an error
-	if !isFavorite {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Article is not in favorites"})
+	// If the article is not in favourites, return an error
+	if !isFavourite {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Article is not in favourites"})
 		return
 	}
 
-	// Update the user's favorites list without the removed article
-	user.FavouriteArticles = updatedFavorites
+	// Update the user's favourites list without the removed article
+	user.FavouriteArticles = updatedFavourites
 
 	// Update the user document in Firestore
 	_, err = userRef.Set(context.Background(), user)
@@ -294,7 +296,105 @@ func RemoveFromFavorites(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Article removed from favorites successfully"})
+	c.JSON(http.StatusOK, gin.H{"message": "Article removed from favourites successfully"})
+}
+
+// AddToFavouriteBlogs adds a blog to the user's favourite blogs
+func AddToFavouriteBlogs(c *gin.Context) {
+	userID := c.Param("id")
+	blogID := c.Query("blogID")
+
+	// Update the user document in Firestore to add the blog to the favourites
+	_, err := db.FirestoreClient.Collection("users").Doc(userID).Update(context.Background(), []firestore.Update{
+		{Path: "FavouriteBlogs", Value: firestore.ArrayUnion(blogID)},
+	})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to add blog to favourites"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Blog added to favourites successfully"})
+}
+
+// RemoveFromFavouriteBlogs removes a blog from the user's favourite blogs
+func RemoveFromFavouriteBlogs(c *gin.Context) {
+	userID := c.Param("id")
+	blogID := c.Query("blogID")
+
+	// Update the user document in Firestore to remove the blog from the favourites
+	_, err := db.FirestoreClient.Collection("users").Doc(userID).Update(context.Background(), []firestore.Update{
+		{Path: "FavouriteBlogs", Value: firestore.ArrayRemove(blogID)},
+	})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to remove blog from favourites"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Blog removed from favourites successfully"})
+}
+
+// AddToFavouriteVideos adds a video to the user's favourite videos
+func AddToFavouriteVideos(c *gin.Context) {
+	userID := c.Param("id")
+	videoID := c.Query("videoID")
+
+	// Update the user document in Firestore to add the video to the favourites
+	_, err := db.FirestoreClient.Collection("users").Doc(userID).Update(context.Background(), []firestore.Update{
+		{Path: "FavouriteVideos", Value: firestore.ArrayUnion(videoID)},
+	})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to add video to favourites"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Video added to favourites successfully"})
+}
+
+// RemoveFromFavouriteVideos removes a video from the user's favourite videos
+func RemoveFromFavouriteVideos(c *gin.Context) {
+	userID := c.Param("id")
+	videoID := c.Query("videoID")
+
+	// Update the user document in Firestore to remove the video from the favourites
+	_, err := db.FirestoreClient.Collection("users").Doc(userID).Update(context.Background(), []firestore.Update{
+		{Path: "FavouriteVideos", Value: firestore.ArrayRemove(videoID)},
+	})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to remove video from favourites"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Video removed from favourites successfully"})
+}
+
+// Fetches all the blogs created by a particular user
+func GetUserBlogs(c *gin.Context) {
+	userID := c.Param("id")
+
+	// Query Firestore to retrieve blogs created by the user
+	iter := db.FirestoreClient.Collection("blogs").Where("AuthorID", "==", userID).Documents(context.Background())
+	var blogs []models.Blog
+	for {
+		doc, err := iter.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve blogs"})
+			return
+		}
+
+		var blog models.Blog
+		if err := doc.DataTo(&blog); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse blog data"})
+			return
+		}
+
+		blogs = append(blogs, blog)
+	}
+	log.Println(blogs)
+
+	c.JSON(http.StatusOK, blogs)
 }
 
 func getUserByEmail(email string) (*models.User, error) {

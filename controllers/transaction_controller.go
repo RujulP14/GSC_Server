@@ -1,54 +1,75 @@
 package controllers
 
 import (
+	"context"
 	"net/http"
+	"time"
 
-	"Server/models" // Import the Transaction model
+	"Server/db"
+	"Server/models"
 
+	"cloud.google.com/go/firestore"
 	"github.com/gin-gonic/gin"
-	"github.com/stripe/stripe-go/v76"
-	"github.com/stripe/stripe-go/v76/checkout/session"
 )
 
-// HandleStripeDonation handles donations using Stripe
-func HandleStripeDonation(c *gin.Context) {
-	// Set up Stripe API key
-	stripe.Key = "sk_test_51Ogl1oSEhw22DH1HkwaWv9XUQNfhnBxgt3CU8Hm8kzxbxyy1PmNlkk4t0f1wJQiaVUkL6XDPFk9jBOMmULvFqTFS002DTkLvpz"
-
-	// Parse request body to get donation amount and currency
+// HandleDonation handles donations by storing transaction data in Firestore
+func HandleDonation(c *gin.Context) {
+	// Parse request body to get transaction data
 	var transaction models.Transaction
 	if err := c.ShouldBindJSON(&transaction); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	// Create a Stripe checkout session
-	params := &stripe.CheckoutSessionParams{
-		PaymentMethodTypes: stripe.StringSlice([]string{
-			"card",
-		}),
-		LineItems: []*stripe.CheckoutSessionLineItemParams{
-			{
-				PriceData: &stripe.CheckoutSessionLineItemPriceDataParams{
-					Currency: stripe.String(transaction.Currency),
-					ProductData: &stripe.CheckoutSessionLineItemPriceDataProductDataParams{
-						Name: stripe.String("Donation"),
-					},
-					UnitAmount: stripe.Int64(transaction.Amount), // Amount in cents
-				},
-				Quantity: stripe.Int64(1),
-			},
-		},
-		Mode:       stripe.String(string(stripe.CheckoutSessionModePayment)),
-		SuccessURL: stripe.String("https://yourwebsite.com/success"),
-		CancelURL:  stripe.String("https://yourwebsite.com/cancel"),
-	}
-	session, err := session.New(params)
+	// Set current time as transaction time
+	transaction.TransactionTime = time.Now()
+
+	// Add transaction to Firestore and retrieve the auto-generated ID
+	docRef, _, err := db.FirestoreClient.Collection("transactions").Add(context.Background(), transaction)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create checkout session"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to store transaction data"})
 		return
 	}
 
-	// Return the session ID to the client
-	c.JSON(http.StatusOK, gin.H{"sessionId": session.ID})
+	// Update the transaction ID with the auto-generated ID from Firestore
+	transactionID := docRef.ID
+	transaction.TransactionID = transactionID
+
+	// Update the transaction document in Firestore with the new ID
+	if _, err := docRef.Set(context.Background(), transaction); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update transaction with ID"})
+		return
+	}
+
+	// Update the campaign's donors with the transaction and sender ID
+	campaignID := transaction.CampaignID
+	donor := models.Donor{
+		DonorID:       transaction.SenderID,
+		TransactionID: transactionID,
+	}
+
+	_, err = db.FirestoreClient.Collection("campaigns").Doc(campaignID).Update(context.Background(), []firestore.Update{
+		{Path: "Donors", Value: firestore.ArrayUnion(donor)},
+	})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update campaign donors"})
+		return
+	}
+
+	// Update the user's donations with the transaction and campaign ID
+	userID := transaction.SenderID
+	donation := models.Donation{
+		TransactionID: transactionID,
+		CampaignID:    transaction.CampaignID,
+	}
+
+	_, err = db.FirestoreClient.Collection("users").Doc(userID).Update(context.Background(), []firestore.Update{
+		{Path: "Donations", Value: firestore.ArrayUnion(donation)},
+	})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user donations"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Transaction data stored successfully"})
 }
