@@ -13,6 +13,7 @@ import (
 
 	"Server/db"
 	"Server/models"
+	"Server/utils"
 )
 
 const blogsCollection = "blogs"
@@ -33,6 +34,8 @@ func CreateBlog(c *gin.Context) {
 	}
 
 	blog.ID = docRef.ID
+
+	blog.EstimatedReadTime = utils.EstimateReadingTime(blog.Content)
 
 	if _, err := docRef.Set(context.Background(), blog); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update blog with ID"})

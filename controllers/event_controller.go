@@ -96,11 +96,11 @@ func UpdateEvent(c *gin.Context) {
 
 	// Update only the specified fields in the existing event document
 	fieldsToUpdate := map[string]interface{}{
-		"Title":          updatedEvent.Title,
-		"UploadDateDate": updatedEvent.UploadDate,
-		"Location":       updatedEvent.Location,
-		"Description":    updatedEvent.Description,
-		"Banner":         updatedEvent.Banner,
+		"Title":       updatedEvent.Title,
+		"Date":        updatedEvent.Date,
+		"Location":    updatedEvent.Location,
+		"Description": updatedEvent.Description,
+		"Banner":      updatedEvent.Banner,
 	}
 
 	// Perform the update operation on Firestore

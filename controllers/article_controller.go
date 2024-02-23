@@ -8,6 +8,7 @@ import (
 
 	"Server/db"
 	"Server/models"
+	"Server/utils"
 
 	"cloud.google.com/go/firestore"
 	"github.com/gin-gonic/gin"
@@ -39,10 +40,11 @@ func CreateArticle(c *gin.Context) {
 	// Set the article ID in the model
 	article.ID = articleID
 
+	// Set estimated read time
+	article.EstimatedReadTime = utils.EstimateReadingTime(article.Content)
+
 	// Update the UID in Firestore
-	_, err = docRef.Update(context.Background(), []firestore.Update{
-		{Path: "ID", Value: articleID},
-	})
+	_, err = docRef.Set(context.Background(), article)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update ID in Firestore"})
 		return

@@ -31,19 +31,19 @@ func GetGeminiAPIKey() string {
 func MakeGeminiAPIRequest(apiKey string, payload map[string]interface{}) ([]byte, error) {
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to create JSON payload: %v", err)
+		return nil, fmt.Errorf("failed to create JSON payload: %v", err)
 	}
 
 	url := fmt.Sprintf("%s%s", GeminiAPIURL, apiKey)
 	resp, err := http.Post(url, "application/json", bytes.NewBuffer(jsonPayload))
 	if err != nil {
-		return nil, fmt.Errorf("Failed to make API request: %v", err)
+		return nil, fmt.Errorf("failed to make API request: %v", err)
 	}
 	defer resp.Body.Close()
 
 	responseBody, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to read response body: %v", err)
+		return nil, fmt.Errorf("failed to read response body: %v", err)
 	}
 
 	return responseBody, nil
@@ -62,7 +62,7 @@ func ParseGeminiAPIResponse(responseBody []byte) (string, error) {
 	}
 
 	if err := json.Unmarshal(responseBody, &chatbotResponse); err != nil {
-		return "", fmt.Errorf("Failed to parse response JSON: %v", err)
+		return "", fmt.Errorf("failed to parse response JSON: %v", err)
 	}
 
 	var generatedText string
