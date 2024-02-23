@@ -9,6 +9,6 @@ import (
 func SetupStripeRoutes(router *gin.Engine) {
 	transactionGroup := router.Group("/api/transactions")
 	{
-		transactionGroup.POST("/donate", controllers.HandleStripeDonation)
+		transactionGroup.POST("/donate", controllers.HandleDonation)
 	}
 }
