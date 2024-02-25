@@ -294,14 +294,23 @@ GET /chatbot
 Content-type: application/json
 
 {
-    "inputText": "What is menstruation"
+    "contents": [
+        {
+            "role": "user",
+            "parts": [
+                {
+                    "text": "What are you?"
+                }
+            ]
+        }
+    ]
 }
 ```
 
 ```
 Response example
 {
-    "text": "Menstruation is the natural process of shedding the lining of the uterus (womb). It occurs when a woman is not pregnant. Menstruation is also known as a period.\n\nThe menstrual cycle is a complex process that is controlled by hormones. Each month, the ovaries release an egg (ovulation).
+    "text": "I am a large language model, trained by Google."
 }
 ```
 
@@ -329,6 +338,14 @@ Content-Type: application/json
 }
 ```
 
+```
+Response example
+{
+    "id": "OrnuOI0xFqCkonRXAMtZ",
+    "message": "Video created successfully"
+}
+```
+
 2. **Get Videos**
 
 ```
@@ -345,7 +362,8 @@ GET /videos/:id/
 
 ```
 PUT /videos/:id/
-Response Example
+Content-Type: application/json
+
 {
     "title": "Introduction to Machine Learning",
     "uploader": "JohnDoe",
@@ -363,6 +381,13 @@ Response Example
 }
 ```
 
+```
+Response Example
+{
+    "message": "Video updated successfully"
+}
+```
+
 5. **Delete Video**
 
 ```
@@ -373,12 +398,26 @@ DELETE /videos/:id/
 
 ```
 POST /videos/:id/comments/
-Response Example
+Content-Type: application/json
 {
     "userID": "user1",
     "content": "This is the first comment"
 }
 ```
+
+```
+Response Example
+{
+    "message": "Comment added successfully"
+}
+```
+
+7. **Delete a Comment**
+
+```
+DELETE /videos/:video_id/comments?:comment_id/
+```
+
 
 #### Donate
 
@@ -386,12 +425,19 @@ Response Example
 
 ```
 POST /transactions/donate/
-Response Example
+Content-Type: application/json
 {
     "senderID": "baE9bUIhfAKLSFEzDauO",
     "receiverID": "HnHCQyvhHRxdP0oHhdDa",
     "campaignID": "DZC5nZOkF5ggNXAIEriJ",
     "amount": 100
+}
+```
+
+```
+Response Example
+{
+    "message": "Transaction data stored successfully"
 }
 ```
 
@@ -449,6 +495,12 @@ Content type: application/json
 POST /events/:id/register?user=:id/
 ```
 
+6. **Delete an event**
+
+```
+DELETE /events/:id/
+```
+
 #### Campaigns
 
 1. **Create Campaign**
@@ -464,6 +516,14 @@ Content type: application/json
     "raisedMoney": 1500,
     "totalGoal": 5000,
     "donors": []
+}
+```
+
+```
+Response Example
+{
+    "id": "rfOYhSGYYCeoMBPawzDP",
+    "message": "Campaign created successfully"
 }
 ```
 
@@ -504,4 +564,97 @@ Content type: application/json
 ```
 PATCH /campaigns/:id/add-donor
 PATCH /campaigns/:id/remove-donor
+```
+
+
+#### Blogs
+
+1. **Create a blog**
+
+```
+Content type: application/json
+{
+    "id": "6",
+    "title": "Menstrual Health and Nutrition: What You Need to Know",
+    "content": "Nutrition plays a key role in menstrual health. In this blog post, we explore the impact of diet and nutrition on menstrual cycles, offering practical tips, dietary recommendations, and nutrient-rich recipes to support women's health and well-being.",
+    "author": "Nutritionists",
+    "image": "https://www.shutterstock.com/image-vector/set-feminine-hygiene-products-tampons-260nw-2359875625.jpg",
+    "category": "Nutrition",
+    "date": "2024-02-26T13:00:00Z"
+}
+```
+
+```
+Response Example
+{
+    "id": "YwmCEwZBahQv6X4ehxiO",
+    "message": "Blog created successfully"
+}
+```
+
+
+2. **Get Blogs**
+
+```
+GET /blogs/
+```
+
+
+#### Articles
+
+1. **Create Article**
+
+```
+Content type: application/json
+{
+    "id": "7",
+    "title": "Menstrual Health Advocacy: Bridging the Gap",
+    "authorName": "Advocacy Group",
+    "uploadDate": "2024-02-27T13:00:00Z",
+    "content": "This article advocates for better menstrual health policies and programs to address the needs of marginalized communities. It calls for increased awareness, access to menstrual products, and support for menstrual health initiatives.",
+    "tags": ["Menstrual Health Advocacy", "Policy", "Marginalized Communities"],
+    "category": "Social Justice",
+    "thumbnailUrl": "https://www.shutterstock.com/shutterstock/photos/2120616122/display_1500/stock-vector-women-s-day-banner-for-product-demonstration-pink-pedestal-or-podium-with-number-and-hearts-on-2120616122.jpg",
+    "comments": [],
+    "likes": 0
+  }
+```
+
+```
+Response Example
+{
+    "id": "GzON4geEUT0KwUKfbwwq",
+    "message": "Article created successfully"
+}
+```
+
+2. **Update an Article**
+
+```
+Content type: application/json
+
+{
+    "id": "article1",
+    "title": "Sample Article",
+    "authorName": "John Doe",
+    "uploadDate": "2024-02-06T12:00:00Z",
+    "content": "This is a sample article content.",
+    "tags": [
+        "tag1",
+        "tag2",
+        "tag3"
+    ],
+    "category": "Sample Category",
+    "thumbnailURL": "https://example.com/thumbnail.jpg",
+    "comments": [],
+    "likes": 0
+}
+```
+
+```
+Response Example
+
+{
+    "message": "Article updated successfully"
+}
 ```
