@@ -64,8 +64,16 @@ Before you begin, make sure you have the following installed:
 ```bash
    go mod download
 ```
+5. **Make a .env file**:
+   - Create a file named `.env` in the root directory of the project. This file will contain the API key required for Gemini integration.
+   - Visit [Gemini](https://ai.google.dev/) to obtain an API key.
+   - Store the API key in the `.env` file in the following format:
+     ```
+     API_KEY=your_api_key_here
+     ```
+   Replace `your_api_key_here` with the API key obtained from Gemini.
 
-5. **Run the server:**
+6. **Run the server:**
 
 ```bash
     go run server.go
