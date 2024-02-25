@@ -1,6 +1,0 @@
-runtime: go120
-env: flex
-
-handlers:
-- url: /.*
-  script: auto
