@@ -68,8 +68,11 @@ Before you begin, make sure you have the following installed:
    - Create a file named `.env` in the root directory of the project. This file will contain the API key required for Gemini integration.
    - Visit [Gemini](https://ai.google.dev/) to obtain an API key.
    - Store the API key in the `.env` file in the following format:
+   - Add your custom port if there is any.
+   .env.example
      ```
-     API_KEY=your_api_key_here
+     API_KEY="yourApiKey"
+     PORT=7878
      ```
    Replace `your_api_key_here` with the API key obtained from Gemini.
 
