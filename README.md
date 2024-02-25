@@ -13,6 +13,12 @@ Welcome to the NGO API documentation. This API allows you to manage NGOs, includ
   - [User](#user)
   - [NGO](#ngo)
   - [Chatbot](#chatbot)
+  - [Videos](#videos)
+  - [Donate](#donate)
+  - [Events](#events)
+  - [Campaigns](#campaigns)
+  - [Blogs](#blogs)
+  - [Articles](#articles)
 
 ## Introduction
 
