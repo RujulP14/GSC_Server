@@ -173,6 +173,12 @@ GET /users/
 GET /users/:id/
 ```
 
+7. **Get User's Favourite Blog:**
+
+```
+GET /users/:id/favourite-blog
+```
+
 #### NGO
 
 1. **Signup NGO:**
@@ -297,4 +303,205 @@ Response example
 {
     "text": "Menstruation is the natural process of shedding the lining of the uterus (womb). It occurs when a woman is not pregnant. Menstruation is also known as a period.\n\nThe menstrual cycle is a complex process that is controlled by hormones. Each month, the ovaries release an egg (ovulation).
 }
+```
+
+#### Videos
+
+1. **Upload videos**
+
+```
+POST /videos/
+Content-Type: application/json
+
+{
+    "id": "6",
+    "title": "Yoga for Menstrual Health",
+    "videoUrl": "https://www.youtube.com/watch?v=zcvo9VLVHWc&pp=ygUXbWVuc3RydWFsIGhlYWx0aCB2aWRlb3M%3D",
+    "uploader": "Yoga Instructors",
+    "uploadDate": "2024-02-26T13:00:00Z",
+    "description": "Practice gentle yoga poses and sequences specifically designed to support menstrual health and alleviate menstrual discomfort. Follow along with experienced yoga instructors to enhance your well-being during menstruation.",
+    "tags": ["Yoga", "Wellness"],
+    "category": "Wellness",
+    "thumbnailUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTrvodvTIzC8wKEoU3h2Z-X3qjHQEuNCYjCJQ&usqp=CAU",
+    "comments": [],
+    "likes": 0,
+    "transcripts": "This is a transcript of the yoga for menstrual health video."
+}
+```
+
+2. **Get Videos**
+
+```
+GET /videos/
+```
+
+3. **Get Particular Video**
+
+```
+GET /videos/:id/
+```
+
+4. **Update Video**
+
+```
+PUT /videos/:id/
+Response Example
+{
+    "title": "Introduction to Machine Learning",
+    "uploader": "JohnDoe",
+    "uploadDate": "2024-02-10T08:00:00Z",
+    "description": "This video provides an overview of machine learning concepts.",
+    "tags": [
+        "machine learning",
+        "artificial intelligence"
+    ],
+    "category": "Education",
+    "thumbnailUrl": "https://example.com/thumbnail.jpg",
+    "comments": [],
+    "likes": 0,
+    "transcripts": "Here are the transcripts of the video..."
+}
+```
+
+5. **Delete Video**
+
+```
+DELETE /videos/:id/
+```
+
+6. **Comment a Video**
+
+```
+POST /videos/:id/comments/
+Response Example
+{
+    "userID": "user1",
+    "content": "This is the first comment"
+}
+```
+
+#### Donate
+
+1. **Donate to an NGO**
+
+```
+POST /transactions/donate/
+Response Example
+{
+    "senderID": "baE9bUIhfAKLSFEzDauO",
+    "receiverID": "HnHCQyvhHRxdP0oHhdDa",
+    "campaignID": "DZC5nZOkF5ggNXAIEriJ",
+    "amount": 100
+}
+```
+
+#### Events
+
+1. **Create event**
+
+```
+POST /events/
+Content-Type: application/json
+{
+    "title": "Women's Empowerment Conference",
+    "date": "2024-11-08",
+    "day": "Saturday",
+    "time": "9:00 AM",
+    "location": "City Auditorium",
+    "description": "Join us for a transformative day dedicated to women's empowerment. This conference features inspiring keynote speakers, interactive workshops, and networking opportunities. Explore topics such as leadership, career advancement, financial independence, and personal development.",
+    "banner": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTgpbXOZ6GIienKI9UUVsgCDI72wVwGMneZLQ",
+    "organizerId": "vVUHa8ErJixf0ANNVSty",
+    "participants": []
+}
+```
+
+2. **Get All Events**
+
+```
+GET /events/
+```
+
+3. **Get Particular Event**
+
+```
+GET /events/:id/
+```
+
+4. **Update Event**
+
+```
+PUT /events/:id/
+Content type: application/json
+{
+  "title": "Community Cleanup Drive",
+  "date": "2024-02-16",
+  "day": "Saturday",
+  "time": "10:00 AM",
+  "location": "Central Park",
+  "description": "Join us for a community cleanup drive to help keep our city clean and green!",
+  "banner": "https://example.com/cleanup_drive_banner.jpg"
+}
+```
+
+5. **Register for event**
+
+```
+POST /events/:id/register?user=:id/
+```
+
+#### Campaigns
+
+1. **Create Campaign**
+
+```
+POST /campaigns/
+Content type: application/json
+{
+    "ngoID": "vVUHa8ErJixf0ANNVSty",
+    "title": "Menstrual Hygiene Awareness Drive",
+    "description": "Join our initiative to raise awareness about menstrual hygiene and break the stigma surrounding menstruation. We conduct educational workshops, distribute sanitary products, and promote open discussions about menstrual health.",
+    "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRc_rEHKqnCO6Ti4ljVRoWx3FaupvymV1zJyg",
+    "raisedMoney": 1500,
+    "totalGoal": 5000,
+    "donors": []
+}
+```
+
+2. **Get all campaigns**
+
+```
+GET /campaigns/
+```
+
+3. **Get a particular campaign**
+
+```
+GET /campaigns/:id/
+```
+
+4. **Update a campaign**
+
+```
+PUT /initiatives/:id/
+Content type: application/json
+{
+    "title": "Save Forests"
+}1
+```
+
+5. **Update Image**
+
+```
+PATCH /campaigns/:id/update-image/
+Content type: application/json
+{
+    "ImageURL": "https://www.example.com/image.jpeg"
+}
+```
+
+6. **Add/remove donor**
+
+```
+PATCH /campaigns/:id/add-donor
+PATCH /campaigns/:id/remove-donor
 ```
